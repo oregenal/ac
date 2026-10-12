@@ -41,11 +41,11 @@ typedef struct {
 		(arr)->data[((arr)->size)++] = (token); \
 	} while(0)
 
-void new_token(Tokens *tokens, Token_type type, OP_type op)
+void new_token(Tokens *tokens, Token_type type, int value)
 {
 	Token result = {0};
 	result.type = type;
-	result.op = op;
+	result.value = value;
 	result.left = NULL;
 	result.right = NULL;
 

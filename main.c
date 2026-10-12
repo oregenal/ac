@@ -54,9 +54,11 @@ void new_token(Tokens *tokens, Token_type type, int value)
 
 Tokens *tokinizer(const char *input, size_t input_len)
 {
+#define INITIAL_DATA_SIZE 16
 	Tokens *tokens = malloc(sizeof(Tokens));
-	tokens->data = malloc(sizeof(*tokens->data) * 16);
-	tokens->capacity = 16;
+	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_DATA_SIZE);
+	tokens->capacity = INITIAL_DATA_SIZE;
+	tokens->size = 0;
 
 	printf("%s\n", input);
 	printf("size :%zu\n", input_len);
@@ -66,18 +68,15 @@ Tokens *tokinizer(const char *input, size_t input_len)
 			continue;
 		} else if (isdigit(input[i])) {
 			new_token(tokens, NUM, atoi(&input[i]));
-			continue;
 		} else if (input[i] == '+') {
 			new_token(tokens, OP, PLUS);
-			continue;
 		} else if (input[i] == '-') {
 			new_token(tokens, OP, MINUS);
-			continue;
 		}
 		printf("|%c|", input[i]);
 	}
 
-	printf("tokens :%zu\n", tokens->size);
+	printf("\ntokens :%zu\n", tokens->size);
 
 	return tokens;
 }
@@ -130,7 +129,7 @@ int process_tree(Token *tree)
 		exit(2);
 	}
 
-	switch (tree->type == OP) {
+	switch (tree->type) {
 		case OP:
 			switch (tree->op) {
 				case PLUS:

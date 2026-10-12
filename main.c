@@ -26,7 +26,7 @@ struct _token {
 };
 
 typedef struct {
-	Token **data;
+	Token *data;
 	size_t size;
 	size_t capacity;
 } Tokens;
@@ -34,27 +34,28 @@ typedef struct {
 #define append(arr, token) \
 	do { \
 		if ((arr)->size >= (arr)->capacity) { \
-			int new_size = (arr)->size * 2 * sizeof((arr)->data); \
+			int new_size = (arr)->size * 2 * sizeof(*((arr)->data)); \
 			(arr)->data = realloc(((arr)->data), new_size); \
 			(arr)->capacity = new_size; \
 		} \
 		(arr)->data[((arr)->size)++] = (token); \
 	} while(0)
 
-Token *new_token(Token_type type, OP_type op)
+void new_token(Tokens *tokens, Token_type type, OP_type op)
 {
-	Token *result = malloc(sizeof *result);
-	result->type = type;
-	result->op = op;
-	result->left = NULL;
-	result->right = NULL;
-	return result;
+	Token result = {0};
+	result.type = type;
+	result.op = op;
+	result.left = NULL;
+	result.right = NULL;
+
+	append(tokens, result);
 }
 
 Tokens *tokinizer(const char *input, size_t input_len)
 {
 	Tokens *tokens = malloc(sizeof(Tokens));
-	tokens->data = malloc(sizeof(tokens->data) * 16);
+	tokens->data = malloc(sizeof(*tokens->data) * 16);
 	tokens->capacity = 16;
 
 	printf("%s\n", input);
@@ -64,13 +65,13 @@ Tokens *tokinizer(const char *input, size_t input_len)
 		if (isspace(input[i])) {
 			continue;
 		} else if (isdigit(input[i])) {
-			append(tokens, new_token(NUM, atoi(&input[i])));
+			new_token(tokens, NUM, atoi(&input[i]));
 			continue;
 		} else if (input[i] == '+') {
-			append(tokens, new_token(OP, PLUS));
+			new_token(tokens, OP, PLUS);
 			continue;
 		} else if (input[i] == '-') {
-			append(tokens, new_token(OP, MINUS));
+			new_token(tokens, OP, MINUS);
 			continue;
 		}
 		printf("|%c|", input[i]);
@@ -84,12 +85,12 @@ Tokens *tokinizer(const char *input, size_t input_len)
 void print_tokens(Tokens *tokens)
 {
 	for (size_t i = 0; i < tokens->size; ++i) {
-		switch (tokens->data[i]->type) {
+		switch (tokens->data[i].type) {
 			case NUM:
-				printf("|%d|", tokens->data[i]->value);
+				printf("|%d|", tokens->data[i].value);
 				break;
 			case OP:
-				printf("|%s|", tokens->data[i]->op == 0 ? "PLUS" : "MINUS");
+				printf("|%s|", tokens->data[i].op == 0 ? "PLUS" : "MINUS");
 				break;
 			default:
 				fprintf(stderr, "ERROR: wrong tokey type\n");
@@ -101,17 +102,17 @@ void print_tokens(Tokens *tokens)
 
 Token *make_tree(Tokens *tokens)
 {
-	Token *tree = tokens->data[0];
+	Token *tree = &tokens->data[0];
 
 	for (size_t i = 0; i < tokens->size; ++i) {
-		switch (tokens->data[i]->type) {
+		switch (tokens->data[i].type) {
 			case NUM:
 				break;
 			case OP: {
 				Token *tmp = tree;
-				tree = tokens->data[i];
+				tree = &tokens->data[i];
 				tree->left = tmp;
-				tree->right = tokens->data[i+1];
+				tree->right = &tokens->data[i+1];
 				break; }
 			default:
 				fprintf(stderr, "ERROR: wrong token type\n");
@@ -159,6 +160,9 @@ int main(void)
 	printf("result: %d\n", process_tree(tree));
 
 	printf("\nDone!\n");
+
+	free(tokens->data);
+	free(tokens);
 
 	return 0;
 }

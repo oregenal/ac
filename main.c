@@ -82,7 +82,7 @@ Tokens *tokinizer(const char *input, size_t input_len)
 					new_token(tokens, OP, MUL);
 					break;
 				default:
-					fprintf(stderr, "ERROR: unknown token\n");
+					fprintf(stderr, "ERROR: unknown symbol '%c'\n", input[i]);
 					exit(4);
 			}
 			++i;
@@ -117,7 +117,7 @@ void print_tokens(Tokens *tokens)
 				}
 				break;
 			default:
-				fprintf(stderr, "ERROR: wrong tokey type\n");
+				fprintf(stderr, "ERROR: wrong token type\n");
 				exit(88);
 		}
 	}
@@ -126,7 +126,7 @@ void print_tokens(Tokens *tokens)
 
 Token *make_tree(Tokens *tokens)
 {
-	Token *tree = &tokens->data[0];
+	Token *tree = tokens->data;
 
 	for (size_t i = 0; i < tokens->size; ++i) {
 		switch (tokens->data[i].type) {

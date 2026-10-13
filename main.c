@@ -55,20 +55,23 @@ void new_token(Tokens *tokens, Token_type type, int value)
 
 Tokens *tokinizer(const char *input, size_t input_len)
 {
-#define INITIAL_DATA_SIZE 16
+#define INITIAL_ARRAY_SIZE 16
 	Tokens *tokens = malloc(sizeof(Tokens));
-	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_DATA_SIZE);
-	tokens->capacity = INITIAL_DATA_SIZE;
+	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_ARRAY_SIZE);
+	tokens->capacity = INITIAL_ARRAY_SIZE;
 	tokens->size = 0;
 
 	printf("%s\n", input);
-	printf("size :%zu\n", input_len);
+	printf("symbols :%zu\n", input_len);
 
-	for (size_t i = 0; i < input_len; ++i) {
+	size_t i = 0;
+	while (i < input_len) {
 		if (isspace(input[i])) {
+			++i;
 			continue;
 		} else if (isdigit(input[i])) {
 			new_token(tokens, NUM, atoi(&input[i]));
+			while (isdigit(input[i])) ++i;
 		} else if (input[i] == '+') {
 			new_token(tokens, OP, PLUS);
 		} else if (input[i] == '-') {
@@ -76,16 +79,17 @@ Tokens *tokinizer(const char *input, size_t input_len)
 		} else if (input[i] == '*') {
 			new_token(tokens, OP, MUL);
 		}
-		printf("|%c|", input[i]);
+		// printf("|%c|", input[i]);
+		++i;
 	}
-
-	printf("\ntokens :%zu\n", tokens->size);
 
 	return tokens;
 }
 
 void print_tokens(Tokens *tokens)
 {
+	printf("tokens :%zu\n", tokens->size);
+
 	for (size_t i = 0; i < tokens->size; ++i) {
 		switch (tokens->data[i].type) {
 			case NUM:

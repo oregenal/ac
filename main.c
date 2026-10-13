@@ -31,15 +31,16 @@ typedef struct {
 	size_t capacity;
 } Tokens;
 
-#define append(arr, token) \
-	do { \
-		if ((arr)->size >= (arr)->capacity) { \
-			int new_size = (arr)->size * 2 * sizeof(*((arr)->data)); \
-			(arr)->data = realloc(((arr)->data), new_size); \
-			(arr)->capacity = new_size; \
-		} \
-		(arr)->data[((arr)->size)++] = (token); \
-	} while(0)
+void append(Tokens *arr, Token token)
+{
+	if (arr->size >= arr->capacity) {
+		int new_size = arr->size * 2 * sizeof(*arr->data);
+		arr->data = realloc(arr->data, new_size);
+		arr->capacity = new_size;
+	}
+
+	arr->data[arr->size++] = token;
+}
 
 void new_token(Tokens *tokens, Token_type type, int value)
 {

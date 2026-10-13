@@ -34,9 +34,8 @@ typedef struct {
 void append(Tokens *arr, Token token)
 {
 	if (arr->size >= arr->capacity) {
-		int new_size = arr->size * 2 * sizeof(*arr->data);
-		arr->data = realloc(arr->data, new_size);
-		arr->capacity = new_size;
+		arr->capacity *= 2;
+		arr->data = realloc(arr->data, sizeof(*arr->data) * arr->capacity);
 	}
 
 	arr->data[arr->size++] = token;
@@ -47,18 +46,16 @@ void new_token(Tokens *tokens, Token_type type, int value)
 	Token result = {0};
 	result.type = type;
 	result.value = value;
-	result.left = NULL;
-	result.right = NULL;
 
 	append(tokens, result);
 }
 
 Tokens *tokinizer(const char *input, size_t input_len)
 {
-#define INITIAL_ARRAY_SIZE 16
+#define INITIAL_ARRAY_CAPACITY 16
 	Tokens *tokens = malloc(sizeof(Tokens));
-	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_ARRAY_SIZE);
-	tokens->capacity = INITIAL_ARRAY_SIZE;
+	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_ARRAY_CAPACITY);
+	tokens->capacity = INITIAL_ARRAY_CAPACITY;
 	tokens->size = 0;
 
 	printf("%s\n", input);

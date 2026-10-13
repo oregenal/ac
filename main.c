@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-const char input[] = "2 + 3 * 4 * 6 + 6 - 20 * 2";
+const char input[] = "2 + 3*4*6 + 6      - 20 * 2";
 
 typedef enum {
 	NUM,
@@ -68,19 +68,28 @@ Tokens *tokinizer(const char *input, size_t input_len)
 	while (i < input_len) {
 		if (isspace(input[i])) {
 			++i;
-			continue;
 		} else if (isdigit(input[i])) {
 			new_token(tokens, NUM, atoi(&input[i]));
-			while (isdigit(input[i])) ++i;
-		} else if (input[i] == '+') {
-			new_token(tokens, OP, PLUS);
-		} else if (input[i] == '-') {
-			new_token(tokens, OP, MINUS);
-		} else if (input[i] == '*') {
-			new_token(tokens, OP, MUL);
+			do {
+				++i;
+			} while (isdigit(input[i]));
+		} else {
+			switch (input[i]) {
+				case '+':
+					new_token(tokens, OP, PLUS);
+					break;
+				case '-':
+					new_token(tokens, OP, MINUS);
+					break;
+				case '*':
+					new_token(tokens, OP, MUL);
+					break;
+				default:
+					fprintf(stderr, "ERROR: unknown token\n");
+					exit(4);
+			}
+			++i;
 		}
-		// printf("|%c|", input[i]);
-		++i;
 	}
 
 	return tokens;

@@ -2,8 +2,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-const char input[] = "2 + 3 + 4 + 5 - 6 + 7 - 8 + 9 - 4 + 8 - 7 + 6 - 5 - 9";
-// const char input[] = "2 + 3 - 1";
+const char input[] = "2 + 3 * 4 * 6 + 6 - 20 * 2";
 
 typedef enum {
 	NUM,
@@ -13,6 +12,7 @@ typedef enum {
 typedef enum {
 	PLUS,
 	MINUS,
+	MUL,
 } OP_type;
 
 typedef struct _token Token;
@@ -73,6 +73,8 @@ Tokens *tokinizer(const char *input, size_t input_len)
 			new_token(tokens, OP, PLUS);
 		} else if (input[i] == '-') {
 			new_token(tokens, OP, MINUS);
+		} else if (input[i] == '*') {
+			new_token(tokens, OP, MUL);
 		}
 		printf("|%c|", input[i]);
 	}
@@ -90,7 +92,19 @@ void print_tokens(Tokens *tokens)
 				printf("|%d|", tokens->data[i].value);
 				break;
 			case OP:
-				printf("|%s|", tokens->data[i].op == 0 ? "PLUS" : "MINUS");
+				switch (tokens->data[i].op) {
+					case PLUS:
+						printf("|PLUS|");
+						break;
+					case MINUS:
+						printf("|MINUS|");
+						break;
+					case MUL:
+						printf("|MUL|");
+						break;
+					default:
+						fprintf(stderr, "ERROR: unknown operand\n");
+				}
 				break;
 			default:
 				fprintf(stderr, "ERROR: wrong tokey type\n");
@@ -113,6 +127,15 @@ Token *make_tree(Tokens *tokens)
 				tree = &tokens->data[i];
 				tree->left = tmp;
 				tree->right = &tokens->data[i+1];
+
+				if (tree->op == MUL 
+						&& tree->left->type == OP
+						&& tree->left->op != MUL) {
+					tmp = tree;
+					tree = tmp->left;
+					tmp->left = tree->right;
+					tree->right = tmp;
+				}
 				break; }
 			default:
 				fprintf(stderr, "ERROR: wrong token type\n");
@@ -139,6 +162,8 @@ int process_tree(Token *tree)
 				case MINUS:
 					return process_tree(tree->left) - process_tree(tree->right);
 					break;
+				case MUL:
+					return process_tree(tree->left) * process_tree(tree->right);
 			}
 			break;
 		case NUM:
@@ -159,7 +184,7 @@ int main(void)
 
 	printf("result: %d\n", process_tree(tree));
 
-	printf("\nDone!\n");
+	printf("Done!\n");
 
 	free(tokens->data);
 	free(tokens);

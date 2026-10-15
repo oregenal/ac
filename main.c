@@ -22,7 +22,7 @@ struct _token {
 		int value;
 		OP_type op;
 	};
-	Token *left, *right;
+	struct _token *left, *right;
 };
 
 typedef struct {

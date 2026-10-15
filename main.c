@@ -50,14 +50,8 @@ void new_token(Tokens *tokens, Token_type type, int value)
 	append(tokens, result);
 }
 
-Tokens *tokinizer(const char *input, size_t input_len)
+void tokinizer(Tokens *tokens, const char *input, size_t input_len)
 {
-#define INITIAL_ARRAY_CAPACITY 16
-	Tokens *tokens = malloc(sizeof(Tokens));
-	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_ARRAY_CAPACITY);
-	tokens->capacity = INITIAL_ARRAY_CAPACITY;
-	tokens->size = 0;
-
 	printf("%s\n", input);
 	printf("symbols :%zu\n", input_len);
 
@@ -88,8 +82,6 @@ Tokens *tokinizer(const char *input, size_t input_len)
 			++i;
 		}
 	}
-
-	return tokens;
 }
 
 void print_tokens(Tokens *tokens)
@@ -186,7 +178,13 @@ int main(void)
 {
 	size_t input_len = sizeof(input) / sizeof(input[0]) - 1;
 
-	Tokens *tokens = tokinizer(input, input_len);
+#define INITIAL_ARRAY_CAPACITY 16
+	Tokens *tokens = malloc(sizeof(Tokens));
+	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_ARRAY_CAPACITY);
+	tokens->capacity = INITIAL_ARRAY_CAPACITY;
+	tokens->size = 0;
+
+	tokinizer(tokens, input, input_len);
 
 	print_tokens(tokens);
 

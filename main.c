@@ -152,6 +152,47 @@ Token *make_tree(Tokens *tokens)
 	return tree;
 }
 
+Token *get_expression(Token *curr_token)
+{
+	Token *next_token = curr_token+1;
+
+	switch (curr_token->type) {
+		case NUM:
+			if (next_token->type == OP) {
+				next_token->left = curr_token;
+				next_token->right = get_expression(curr_token+2);
+				
+				if (next_token->op == MUL
+						&& next_token->right->type == OP
+						&& next_token->right->op != MUL) {
+					Token *tmp = next_token->right;
+					next_token->right = tmp->left;
+					tmp->left = next_token;
+					next_token = tmp;
+				}
+
+				return next_token;
+			} else {
+				return curr_token;
+			}
+		case OP:
+			fprintf(stderr, "Syntax error\n");
+			exit(1);
+		default:
+			fprintf(stderr, "UNREACHABLE\n");
+			exit(1);
+	}
+
+	return NULL; // UNREACHABLE
+}
+
+Token *make_tree_recursive(Tokens *tokens)
+{
+	Token *tree = get_expression(tokens->data);
+
+	return tree;
+}
+
 int process_tree(Token *tree)
 {
 	if (!tree) {
@@ -202,9 +243,13 @@ int main(void)
 
 	print_tokens(tokens);
 
-	Token *tree = make_tree(tokens);
+	// Token *tree = make_tree(tokens);
+	//
+	// printf("result: %d\n", process_tree(tree));
 
-	printf("result: %d\n", process_tree(tree));
+	Token *recursive_tree = make_tree_recursive(tokens);
+
+	printf("result: %d\n", process_tree(recursive_tree));
 
 	printf("Done!\n");
 

@@ -36,6 +36,10 @@ void append(Tokens *arr, Token token)
 	if (arr->size >= arr->capacity) {
 		arr->capacity *= 2;
 		arr->data = realloc(arr->data, sizeof(*arr->data) * arr->capacity);
+		if (arr->data == NULL) {
+			fprintf(stderr, "Not enough memory\n");
+			exit(1);
+		}
 	}
 
 	arr->data[arr->size++] = token;
@@ -180,7 +184,17 @@ int main(void)
 
 #define INITIAL_ARRAY_CAPACITY 16
 	Tokens *tokens = malloc(sizeof(Tokens));
+	if (tokens == NULL) {
+		fprintf(stderr, "Memory fail\n");
+		exit(1);
+	}
+
 	tokens->data = malloc(sizeof(*tokens->data) * INITIAL_ARRAY_CAPACITY);
+	if (tokens->data == NULL) {
+		fprintf(stderr, "Memory fail\n");
+		exit(1);
+	}
+
 	tokens->capacity = INITIAL_ARRAY_CAPACITY;
 	tokens->size = 0;
 

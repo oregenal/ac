@@ -1,6 +1,6 @@
 CC=cc
 CFLAGS=-Wall -Wextra -std=c11 -pedantic -ggdb
-BIN=ast
+BIN=ac
 SRCS=main.c
 
 $(BIN):$(SRCS)

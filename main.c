@@ -162,7 +162,7 @@ Token *make_tree(Tokens *tokens)
 	return tree;
 }
 
-Token *parce_expression(Token *curr_token)
+Token *parse_expression(Token *curr_token)
 {
 	Token *next_token = curr_token+1;
 
@@ -170,7 +170,7 @@ Token *parce_expression(Token *curr_token)
 		case NUM:
 			if (next_token->type == OP) {
 				next_token->left = curr_token;
-				next_token->right = parce_expression(curr_token+2);
+				next_token->right = parse_expression(curr_token+2);
 				
 				if (next_token->right->type == OP
 						&& precedence[next_token->op] 
@@ -198,7 +198,7 @@ Token *parce_expression(Token *curr_token)
 
 Token *make_tree_recursive(Tokens *tokens)
 {
-	Token *tree = parce_expression(tokens->data);
+	Token *tree = parse_expression(tokens->data);
 
 	return tree;
 }

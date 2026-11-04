@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <assert.h>
+
 
 const char input[] = "2 + 3*4*6 + 6      - 20 * 2";
 
@@ -13,7 +16,14 @@ typedef enum {
 	PLUS,
 	MINUS,
 	MUL,
+	TOTAL_OPERATORS,
 } OP_type;
+
+unsigned char precedence[TOTAL_OPERATORS] = {
+	[PLUS]  = 80,
+	[MINUS] = 80,
+	[MUL]   = 160,
+};
 
 typedef struct _token Token;
 struct _token {
@@ -152,7 +162,7 @@ Token *make_tree(Tokens *tokens)
 	return tree;
 }
 
-Token *get_expression(Token *curr_token)
+Token *parce_expression(Token *curr_token)
 {
 	Token *next_token = curr_token+1;
 
@@ -160,11 +170,11 @@ Token *get_expression(Token *curr_token)
 		case NUM:
 			if (next_token->type == OP) {
 				next_token->left = curr_token;
-				next_token->right = get_expression(curr_token+2);
+				next_token->right = parce_expression(curr_token+2);
 				
-				if (next_token->op == MUL
-						&& next_token->right->type == OP
-						&& next_token->right->op != MUL) {
+				if (next_token->right->type == OP
+						&& precedence[next_token->op] 
+						> precedence[next_token->right->op]) {
 					Token *tmp = next_token->right;
 					next_token->right = tmp->left;
 					tmp->left = next_token;
@@ -188,7 +198,7 @@ Token *get_expression(Token *curr_token)
 
 Token *make_tree_recursive(Tokens *tokens)
 {
-	Token *tree = get_expression(tokens->data);
+	Token *tree = parce_expression(tokens->data);
 
 	return tree;
 }
@@ -205,12 +215,12 @@ int process_tree(Token *tree)
 			switch (tree->op) {
 				case PLUS:
 					return process_tree(tree->left) + process_tree(tree->right);
-					break;
 				case MINUS:
 					return process_tree(tree->left) - process_tree(tree->right);
-					break;
 				case MUL:
 					return process_tree(tree->left) * process_tree(tree->right);
+				case TOTAL_OPERATORS:
+					assert(false && "Wrong operator");
 			}
 			break;
 		case NUM:

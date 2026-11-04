@@ -290,8 +290,10 @@ int main(int argc, char **argv)
 	free(tokens->data);
 	free(tokens);
 
-	if (errno)
-		perror("Read file fail");
+	if (errno) {
+		perror("Input read failed");
+		return 1;
+	}
 
 	return 0;
 }

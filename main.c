@@ -88,8 +88,6 @@ void new_token(Tokens *tokens, Token_type type, int value)
 
 void tokinizer(Tokens *tokens, const char *input)
 {
-	// printf("%s\n", input);
-
 	size_t i = 0;
 	while (input[i] != '\0') {
 		if (isspace(input[i])) {
@@ -193,8 +191,8 @@ Token *parse_expression(Token *curr_token)
 				next_token->left = curr_token;
 				next_token->right = parse_expression(curr_token+2);
 				
-				if (next_token->right->type == OP
-						&& precedence[next_token->op] 
+				if (next_token->right->type == OP && 
+						precedence[next_token->op] 
 						> precedence[next_token->right->op]) {
 					Token *tmp = next_token->right;
 					next_token->right = tmp->left;
@@ -264,7 +262,6 @@ void process_input(char *input, Tokens *tokens)
 
 int main(int argc, char **argv)
 {
-	(void) argv;
 	FILE *input_file;
 
 	if (argc < 2)

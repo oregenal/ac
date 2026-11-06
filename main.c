@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
+#include <string.h>
 
 // TODO Brakets.
 // Looks like brackets can be parsed just as a flag of OP
@@ -88,6 +89,8 @@ void new_token(Tokens *tokens, Token_type type, int value)
 
 void tokinizer(Tokens *tokens, const char *input)
 {
+	memset(tokens->data, 0, tokens->capacity*sizeof(tokens->data[0]));
+
 	size_t i = 0;
 	while (input[i] != '\0') {
 		if (isspace(input[i])) {

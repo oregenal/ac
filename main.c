@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <string.h>
 
+// TODO fix 8/2/2 = 8
 // TODO Brakets.
 // Looks like brackets can be parsed just as a flag of OP
 

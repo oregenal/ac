@@ -18,6 +18,7 @@ typedef enum {
 	PLUS,
 	MINUS,
 	MUL,
+	DIV,
 	TOTAL_OPERATORS,
 } OP_type;
 
@@ -25,7 +26,12 @@ unsigned char precedence[TOTAL_OPERATORS] = {
 	[PLUS]  = 80,
 	[MINUS] = 80,
 	[MUL]   = 160,
+
+	// DIV hase little bit more precedence because
+	// in current implementation it matter 
+	[DIV]   = 170,
 };
+static_assert(TOTAL_OPERATORS == 4, "New operator precedence needed");
 
 typedef struct _token Token;
 struct _token {
@@ -102,6 +108,7 @@ void tokinizer(Tokens *tokens, const char *input)
 			} while (isdigit(input[i]));
 		} else {
 			switch (input[i]) {
+				static_assert(TOTAL_OPERATORS == 4, "New operator token needed");
 				case '+':
 					new_token(tokens, OP, PLUS);
 					break;
@@ -110,6 +117,9 @@ void tokinizer(Tokens *tokens, const char *input)
 					break;
 				case '*':
 					new_token(tokens, OP, MUL);
+					break;
+				case '/':
+					new_token(tokens, OP, DIV);
 					break;
 				default:
 					fprintf(stderr, "ERROR: unknown symbol '%c'\n", input[i]);
@@ -139,6 +149,9 @@ void print_tokens(Tokens *tokens)
 						break;
 					case MUL:
 						printf("|MUL|");
+						break;
+					case DIV:
+						printf("|DIV|");
 						break;
 					default:
 						fprintf(stderr, "ERROR: unknown operand\n");
@@ -184,6 +197,20 @@ Token *make_tree(Tokens *tokens)
 	return tree;
 }
 
+Token *rotate_tree(Token *next_token)
+{
+	if (next_token->right->type == OP && 
+			precedence[next_token->op] 
+			> precedence[next_token->right->op]) {
+		Token *tmp = next_token->right;
+		next_token->right = tmp->left;
+		tmp->left = next_token;
+		next_token = tmp;
+	}
+
+	return next_token;
+}
+
 Token *parse_expression(Token *curr_token)
 {
 	Token *next_token = curr_token+1;
@@ -194,14 +221,10 @@ Token *parse_expression(Token *curr_token)
 				next_token->left = curr_token;
 				next_token->right = parse_expression(curr_token+2);
 				
-				if (next_token->right->type == OP && 
-						precedence[next_token->op] 
-						> precedence[next_token->right->op]) {
-					Token *tmp = next_token->right;
-					next_token->right = tmp->left;
-					tmp->left = next_token;
-					next_token = tmp;
-				}
+				next_token = rotate_tree(next_token);
+
+				if (next_token->left->type == OP)
+					next_token->left = rotate_tree(next_token->left);
 
 				return next_token;
 			} else {
@@ -241,6 +264,8 @@ int process_tree(Token *tree)
 					return process_tree(tree->left) - process_tree(tree->right);
 				case MUL:
 					return process_tree(tree->left) * process_tree(tree->right);
+				case DIV:
+					return process_tree(tree->left) / process_tree(tree->right);
 				case TOTAL_OPERATORS:
 					assert(false && "Wrong operator");
 			}
